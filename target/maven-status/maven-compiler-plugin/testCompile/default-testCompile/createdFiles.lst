@@ -1,0 +1,4 @@
+com/jobtracker/service/JobApplicationServiceTest.class
+com/jobtracker/service/AuthServiceTest.class
+com/jobtracker/security/JwtTokenProviderTest.class
+com/jobtracker/exception/GlobalExceptionHandlerTest.class

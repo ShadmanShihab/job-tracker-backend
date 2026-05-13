@@ -1,0 +1,63 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/jobtrackerdb
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
+            scope:
+              - email
+              - profile
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-email-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:your-256-bit-jwt-secret-key-placeholder-change-this}
+    expiration-ms: 86400000
+    refresh-expiration-ms: 604800000
+
+  aws:
+    access-key: ${AWS_ACCESS_KEY:your-aws-access-key}
+    secret-key: ${AWS_SECRET_KEY:your-aws-secret-key}
+    region: ${AWS_REGION:us-east-1}
+    s3:
+      bucket-name: ${AWS_S3_BUCKET:your-s3-bucket-name}
+
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  password-reset-token-expiry-minutes: 60
+
+server:
+  port: 8080
