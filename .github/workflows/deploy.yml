@@ -98,26 +98,29 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: AWS_REGION,ECR_REPOSITORY
-          script: |
-            ECR_REGISTRY=$(aws ecr get-authorization-token \
-              --region $AWS_REGION \
-              --query 'authorizationData[0].proxyEndpoint' \
-              --output text | sed 's|https://||')
+          envs: AWS_REGION,ECR_REPOSITORY,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        script: |
+          ECR_REGISTRY=$(aws ecr get-authorization-token \
+            --region $AWS_REGION \
+            --query 'authorizationData[0].proxyEndpoint' \
+            --output text | sed 's|https://||')
 
-            aws ecr get-login-password --region $AWS_REGION \
-              | docker login --username AWS --password-stdin $ECR_REGISTRY
+          aws ecr get-login-password --region $AWS_REGION \
+            | docker login --username AWS --password-stdin $ECR_REGISTRY
 
-            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-            docker stop job-tracker-backend || true
-            docker rm job-tracker-backend || true
+          docker stop job-tracker-backend || true
+          docker rm job-tracker-backend || true
 
-            docker run -d \
-              --name job-tracker-backend \
-              --restart unless-stopped \
-              -p 8080:8080 \
-              --env-file /home/${{ secrets.EC2_USERNAME }}/.env \
-              $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker run -d \
+            --name job-tracker-backend \
+            --restart unless-stopped \
+            -p 8080:8080 \
+            --env-file /home/${{ secrets.EC2_USERNAME }}/.env \
+            $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-            docker image prune -f
+          docker image prune -f
