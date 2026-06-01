@@ -107,15 +107,24 @@ jobs:
               --region $AWS_REGION \
               --query 'authorizationData[0].proxyEndpoint' \
               --output text | sed 's|https://||')
+
             aws ecr get-login-password --region $AWS_REGION \
               | docker login --username AWS --password-stdin $ECR_REGISTRY
+
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
             docker stop job-tracker-backend || true
             docker rm job-tracker-backend || true
+
             docker run -d \
               --name job-tracker-backend \
               --restart unless-stopped \
-              -p 8080:8080 \
-              --env-file /home/${{ secrets.EC2_USERNAME }}/.env \
+              --network host \
+              --env-file /home/ubuntu/.env \
               $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
             docker image prune -f
+
+            sleep 20
+            curl -f http://localhost:8080/actuator/health || exit 1
+            echo "Deployment successful!"
